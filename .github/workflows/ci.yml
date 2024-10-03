@@ -1,0 +1,67 @@
+name: deploy.yml
+
+on:
+  push:
+    branches: [ "main" ]
+    
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps: 
+    - name: Checkout repository 
+      uses: actions/checkout@v2 
+      
+    - name: Set up Node.js 
+      uses: actions/setup-node@v2 
+      with:
+        node-version: '14' # specify your Node.js version 
+        
+    - name: Install dependencies 
+      run: yarn install 
+      
+    - name: Build project 
+      run: yarn run build # or your specific build command
+    
+
+    - run: tar -czf build.tar.gz build
+
+    - name: Upload build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifact
+        path: build.tar.gz
+
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps: 
+      - name: Checkout repository
+        uses: actions/Checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifact
+          path: build/
+
+      - name: Deploy via SSH 
+        env: 
+          SSH_PRIVATE_KEY: ${{secrets.SSH_KEY}}
+        run:
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-add ~/.ssh/id_rsa
+          ssh-keyscan -H ${{secrets.SSH_HOST}} >> ~/.ssh/known_hosts
+          
+          scp -i ~/.ssh/id_rsa -P ${{secrets.SSH_PORT}} build/build.tar.gz ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}
+
+          ssh -i ~/.ssh/id_rsa -p ${{secrets.SSH_PORT}} ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} <<'EOF'
+            cd /var/www/html
+            tar -xzf build.tar.gz
+          EOF
