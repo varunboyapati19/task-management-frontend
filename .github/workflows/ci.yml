@@ -64,9 +64,9 @@ jobs:
           ssh-add ~/.ssh/id_rsa
           ssh-keyscan -H ${{secrets.SSH_HOST}} >> ~/.ssh/known_hosts
           
-          scp -i ~/.ssh/id_rsa -P ${{secrets.SSH_PORT}} build/build.tar.gz ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}
+          scp -i ~/.ssh/id_rsa -P ${{secrets.SSH_PORT}} build/build.tar.gz ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:/home/ec2-user/deploy
 
           ssh -i ~/.ssh/id_rsa -p ${{secrets.SSH_PORT}} ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} <<'EOF'
-            cd /var/www/html
+            cd /home/ec2-user/deploy
             tar -xzf build.tar.gz
           EOF
