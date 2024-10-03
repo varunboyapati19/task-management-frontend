@@ -1,4 +1,4 @@
-name: Counter App CI
+name: deploy.yml
 
 on:
   push:
