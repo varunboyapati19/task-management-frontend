@@ -19,7 +19,10 @@ jobs:
       with:
         node-version: '14' # specify your Node.js version 
         
-    - name: Install dependencies 
+    - name: Install dependencies
+      run: npm install --global yarn
+
+    - name: Install dependencies
       run: yarn install 
       
     - name: Build project 
