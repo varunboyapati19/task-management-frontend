@@ -22,7 +22,7 @@ jobs:
     - name: Install dependencies
       run: npm install --global yarn
     - name: python
-      run: sudo yum install python2
+      run: sudo apt install python2
 
     - name: Install dependencies
       run: yarn install
